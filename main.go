@@ -3,6 +3,7 @@ package main
 import (
     "github.com/gin-gonic/gin"
     "net/http"
+    "model/mysql"
 )
 
 func main() {
