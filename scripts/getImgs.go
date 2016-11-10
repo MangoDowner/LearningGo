@@ -12,13 +12,12 @@ import (
 
 func main() {
     //fmt.Println(">>>>>输入要搜索的盘符，以回车结束")
-
     resultFolderName := "D:\\SearchResult" //存放搜索结果的文件夹
     os.Mkdir(resultFolderName, 777)
     quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
     os.Mkdir(quickDirName, 777)
     resultTextName := resultFolderName + "\\文件清单.txt"
-    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv"}
+    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
     //var suffixArr = []string{"jpg", "gif"}
     reader := bufio.NewReader(os.Stdin)
     for {
