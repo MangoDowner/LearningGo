@@ -1,3 +1,7 @@
-ткппртобж╦аН
+О©╫О©╫О©╫О©╫О©╫О©╫О©╫О©╫ж╦О©╫О©╫
 go get github.com/gin-gonic/gin
-go get github.com/lxn/walk  
+go get github.com/lxn/walk
+go get github.com/akavel/rsrc
+
+walkГ └Ф√┤Ф║ё
+https://godoc.org/github.com/lxn/walk#pkg-index
