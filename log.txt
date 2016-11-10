@@ -1,0 +1,3 @@
+运行以下指令
+go get github.com/gin-gonic/gin
+go get github.com/lxn/walk  
