@@ -1,38 +1,12 @@
-package main
+package scripts
 
 import (
-    "fmt"
     "io/ioutil"
     "os"
     "os/exec"
     "path/filepath"
     "strings"
-    "bufio"
 )
-
-func main() {
-    //fmt.Println(">>>>>输入要搜索的盘符，以回车结束")
-    resultFolderName := "D:\\SearchResult" //存放搜索结果的文件夹
-    os.Mkdir(resultFolderName, 777)
-    quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
-    os.Mkdir(quickDirName, 777)
-    resultTextName := resultFolderName + "\\文件清单.txt"
-    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
-    //var suffixArr = []string{"jpg", "gif"}
-    reader := bufio.NewReader(os.Stdin)
-    for {
-        fmt.Println(">>>>>输入要搜索的目录，以回车结束")
-        searchPath, _, _ := reader.ReadLine()
-        files, names, _ := WalkDir(string(searchPath), suffixArr)
-        f, _ := os.OpenFile(resultTextName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0x644)
-        for k, v := range files {
-            f.WriteString(v + "\r\n")
-            createQuickRef(v, names[k], quickDirName)
-            fmt.Println(v)
-        }
-        fmt.Println("\r\n---------搜索结果储存于 D:\\SearchResult----------\r\n")
-    }
-}
 
 
 //获取指定目录下的所有文件，不进入下一级目录搜索，可以匹配后缀过滤。
@@ -80,7 +54,7 @@ func WalkDir(dirPth string, suffixArr []string) (files []string, names []string,
 }
 
 //建立快捷方式
-func createQuickRef(path string, name string, destPath string) {
+func CreateQuickRef(path string, name string, destPath string) {
     dest_path := destPath + "\\" + name
     c := exec.Command("cmd", "/C", "echo [InternetShortcut] >>"+dest_path+".url")
     c.Run()

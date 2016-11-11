@@ -1,16 +1,15 @@
 package main
-
+//rsrc -manifest test.manifest -o rsrc.syso 已经做过无需在做
 import (
     "github.com/lxn/walk"
     . "github.com/lxn/walk/declarative"
-    "strings"
+    "operation"
 )
 
 func main() {
     var inTE, outTE *walk.TextEdit
-
     MainWindow{
-        Title:   "SCREAMO",
+        Title:   "第一个APP",
         MinSize: Size{600, 400},
         Layout:  VBox{},
         Children: []Widget{
@@ -21,11 +20,12 @@ func main() {
                 },
             },
             PushButton{
-                Text: "SCREAM",
-                OnClicked: func() {
-                    outTE.SetText(strings.ToUpper(inTE.Text()))
+                Text: "到右边去吧",
+                OnClicked: func(){
+                    operation.SearchViedos(inTE, outTE) //寻找视频操作
                 },
             },
         },
     }.Run()
 }
+
