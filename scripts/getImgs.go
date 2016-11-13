@@ -6,7 +6,69 @@ import (
     "os/exec"
     "path/filepath"
     "strings"
+    "github.com/lxn/walk"
+    . "github.com/lxn/walk/declarative"
+    "public"
+    "log"
 )
+
+
+type MyMainWindow struct {
+    *walk.MainWindow
+}
+
+//展现主框体
+func CreateSearchViedoFrame() {
+    mw := new(MyMainWindow)
+    
+    var textEdit *walk.TextEdit //拖拽文件目录匡
+    var startSearchBtn *walk.PushButton //触发时间的按钮
+    
+    if err := (MainWindow{
+        AssignTo: &mw.MainWindow,
+        Title:   "发现视频",
+        MinSize: Size{320, 240},
+        Layout:  VBox{},
+        OnDropFiles: func(files []string) {
+            textEdit.SetText(strings.Join(files, "\r\n"))
+        },
+        Children: []Widget{
+            TextEdit{
+                AssignTo: &textEdit,
+                ReadOnly: true,
+                Text:     "将文件拖到这里，就可以发现文件夹里的视频！",
+            },
+            PushButton{
+                AssignTo: &startSearchBtn,
+                Text:     "开始搜索了",
+                OnClicked: func() { SearchViedo(textEdit) },
+            },
+        },
+    }.Create()); err != nil {
+        log.Fatal(err)
+    }
+    public.SetIcon(mw.MainWindow, "")
+    mw.Run()
+}
+
+//搜寻视频操作
+func SearchViedo(inTE *walk.TextEdit) {
+    resultFolderName := "E:\\SearchResult" //存放搜索结果的文件夹
+    os.Mkdir(resultFolderName, 777)
+    quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
+    os.Mkdir(quickDirName, 777)
+    resultTextName := resultFolderName + "\\文件清单.txt"
+    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
+    //var suffixArr = []string{"jpg", "gif"}
+    searchPath := inTE.Text()
+    files, names, _ := WalkDir(string(searchPath), suffixArr)
+    f, _ := os.OpenFile(resultTextName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0x644)
+    for k, v := range files {
+        f.WriteString(v + "\r\n")
+        CreateQuickRef(v, names[k], quickDirName) //建立文本的快捷方式
+    }
+    inTE.SetText("搜索结果储存于 E:\\SearchResult")
+}
 
 
 //获取指定目录下的所有文件，不进入下一级目录搜索，可以匹配后缀过滤。
@@ -65,4 +127,3 @@ func CreateQuickRef(path string, name string, destPath string) {
     c = exec.Command("cmd", "/C", "echo IconFile="+path+" >>"+dest_path+".url")
     c.Run()
 }
-
