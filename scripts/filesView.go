@@ -243,7 +243,7 @@ func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []stri
                 } else {
                     size = fmt.Sprintf( "%d KB", int(info.Size() / 1024) )
                 }
-                m.dirPath = filepath.Dir(filename)
+                m.dirPath = filepath.Dir(filename) //为了防止最后一个webview不刷新，需要至少获取一个正确的文件图标
                 item := &FileInfo{
                     Name:     info.Name(),
                     Path:     filepath.Dir(filename),
