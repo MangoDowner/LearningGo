@@ -39,15 +39,19 @@ func CreateSearchViedoFrame() {
         Children: []Widget{
             HSplitter{
                 Children: []Widget{
-                    TextEdit{
-                        AssignTo: &textEdit,
-                        ReadOnly: true,
-                        Text:     "将文件拖到这里，就可以发现文件夹里的视频！",
-                    },
-                    PushButton {
-                        AssignTo: &startSearchBtn,
-                        Text:     "我 们 开 始 搜 索 了 ！",
-                        OnClicked: func() { SearchViedo(textEdit, tableModel) },
+                    VSplitter{
+                        Children: []Widget{
+                            TextEdit{
+                                AssignTo: &textEdit,
+                                ReadOnly: true,
+                                Text:     "将 文 件 夹 拉 到 这 里",
+                            },
+                            PushButton {
+                                AssignTo: &startSearchBtn,
+                                Text:     "我 们 开 始 搜 索 了 ！",
+                                OnClicked: func() { SearchViedo(textEdit, tableModel) },
+                            },
+                        },
                     },
                     TableView{
                         AssignTo:      &tableView,
@@ -58,28 +62,28 @@ func CreateSearchViedoFrame() {
                                 DataMember: "Name",
                                 Width: 300,
                             },
-                            TableViewColumn{
-                                Title: "大小",
-                                DataMember: "Size",
-                                Width: 100,
-                            },
-                            TableViewColumn{
-                                Title: "最后修改时间",
-                                DataMember: "Modified",
-                                Format:     "2006-01-02 15:04:05",
-                                Width: 150,
-                            },
+                            //TableViewColumn{
+                            //    Title: "大小",
+                            //    DataMember: "Size",
+                            //    Width: 100,
+                            //},
+                            //TableViewColumn{
+                            //    Title: "最后修改时间",
+                            //    DataMember: "Modified",
+                            //    Format:     "2006-01-02 15:04:05",
+                            //    Width: 150,
+                            //},
                         },
                         Model: tableModel,
                         OnCurrentIndexChanged: func() {
-                            //var url string
-                            //if index := tableView.CurrentIndex(); index > -1 {
-                            //    path := tableModel.items[index].Path
+                            var url string
+                            if index := tableView.CurrentIndex(); index > -1 {
+                                path := tableModel.items[index].Path
                             //    //dir := treeView.CurrentItem().(*Directory)
                             //    //url = filepath.Join(dir.Path(), name)
-                            //    url = path
-                            //}
-                            webView.SetURL("D:\\")
+                                url = path
+                            }
+                            webView.SetURL(url)
                         },
                     },
                     WebView {
@@ -105,8 +109,8 @@ func SearchViedo(inTE *walk.TextEdit, tableModel *FileInfoModel) {
     //quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
     //os.Mkdir(quickDirName, 777)
     //resultTextName := resultFolderName + "\\文件清单.txt"
-    //var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
-    var suffixArr = []string{"jpg", "gif"}
+    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
+    //var suffixArr = []string{"jpg", "gif"}
     searchPath := inTE.Text()
     tableModel.WalkDir(string(searchPath), suffixArr)
     //files, _, _ := WalkDir(string(searchPath), suffixArr)

@@ -105,21 +105,18 @@ var _ walk.TreeModel = new(DirectoryTreeModel)
 func NewDirectoryTreeModel() (*DirectoryTreeModel, error) {
     model := new(DirectoryTreeModel)
     model.roots = nil
-    //drives, err := walk.DriveNames()
-    //if err != nil {
-    //    return nil, err
-    //}
-    path := NewDirectory("F:\\", nil)
-    model.roots = append(model.roots, NewDirectory("Learn", path))
+    drives, err := walk.DriveNames()
+    if err != nil {
+        return nil, err
+    }
+    for _, drive := range drives {
+        switch drive {
+        case "A:\\", "B:\\":
+            continue
+        }
 
-    //for _, drive := range drives {
-    //    switch drive {
-    //    case "A:\\", "B:\\":
-    //        continue
-    //    }
-    //
-    //    model.roots = append(model.roots, NewDirectory(drive, nil))
-    //}
+        model.roots = append(model.roots, NewDirectory(drive, nil))
+    }
 
     return model, nil
 }
@@ -246,6 +243,7 @@ func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []stri
                 } else {
                     size = fmt.Sprintf( "%d KB", int(info.Size() / 1024) )
                 }
+                m.dirPath = filepath.Dir(filename)
                 item := &FileInfo{
                     Name:     info.Name(),
                     Path:     filepath.Dir(filename),
