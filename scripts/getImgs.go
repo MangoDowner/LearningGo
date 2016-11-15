@@ -30,58 +30,63 @@ func CreateSearchViedoFrame() {
     if err := (MainWindow{
         AssignTo: &mainWindow,
         Title:   "发现视频",
-        MinSize: Size{610, 400},
-        Layout:  VBox{},
+        MinSize:  Size{600, 400},
+        Size:     Size{1024, 640},
+        Layout:   HBox{MarginsZero: true},
         OnDropFiles: func(files []string) {
             textEdit.SetText(strings.Join(files, "\r\n"))
         },
         Children: []Widget{
-            TextEdit{
-                AssignTo: &textEdit,
-                ReadOnly: true,
-                Text:     "将文件拖到这里，就可以发现文件夹里的视频！",
-            },
-            PushButton {
-                AssignTo: &startSearchBtn,
-                Text:     "我 们 开 始 搜 索 了 ！",
-                OnClicked: func() { SearchViedo(textEdit, tableModel) },
-            },
-            TableView{
-                AssignTo:      &tableView,
-                StretchFactor: 2,
-                Columns: []TableViewColumn{
-                    TableViewColumn{
-                        Title: "名称",
-                        DataMember: "Name",
-                        Width: 300,
+            HSplitter{
+                Children: []Widget{
+                    TextEdit{
+                        AssignTo: &textEdit,
+                        ReadOnly: true,
+                        Text:     "将文件拖到这里，就可以发现文件夹里的视频！",
                     },
-                    TableViewColumn{
-                        Title: "大小",
-                        DataMember: "Size",
-                        Width: 100,
+                    PushButton {
+                        AssignTo: &startSearchBtn,
+                        Text:     "我 们 开 始 搜 索 了 ！",
+                        OnClicked: func() { SearchViedo(textEdit, tableModel) },
                     },
-                    TableViewColumn{
-                        Title: "最后修改时间",
-                        DataMember: "Modified",
-                        Format:     "2006-01-02 15:04:05",
-                        Width: 150,
+                    TableView{
+                        AssignTo:      &tableView,
+                        StretchFactor: 2,
+                        Columns: []TableViewColumn{
+                            TableViewColumn{
+                                Title: "名称",
+                                DataMember: "Name",
+                                Width: 300,
+                            },
+                            TableViewColumn{
+                                Title: "大小",
+                                DataMember: "Size",
+                                Width: 100,
+                            },
+                            TableViewColumn{
+                                Title: "最后修改时间",
+                                DataMember: "Modified",
+                                Format:     "2006-01-02 15:04:05",
+                                Width: 150,
+                            },
+                        },
+                        Model: tableModel,
+                        OnCurrentIndexChanged: func() {
+                            //var url string
+                            //if index := tableView.CurrentIndex(); index > -1 {
+                            //    path := tableModel.items[index].Path
+                            //    //dir := treeView.CurrentItem().(*Directory)
+                            //    //url = filepath.Join(dir.Path(), name)
+                            //    url = path
+                            //}
+                            webView.SetURL("D:\\")
+                        },
+                    },
+                    WebView {
+                        AssignTo: &webView,
+                        StretchFactor: 2,
                     },
                 },
-                Model: tableModel,
-                OnCurrentIndexChanged: func() {
-                    var url string
-                    if index := tableView.CurrentIndex(); index > -1 {
-                        path := tableModel.items[index].Path
-                        //dir := treeView.CurrentItem().(*Directory)
-                        //url = filepath.Join(dir.Path(), name)
-                        url = path
-                    }
-                    webView.SetURL(url)
-                },
-            },
-            WebView {
-                AssignTo: &webView,
-                StretchFactor: 2,
             },
         },
     }.Create()); err != nil {
