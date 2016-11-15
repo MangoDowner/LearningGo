@@ -19,15 +19,18 @@ type MyMainWindow struct {
 
 //展现主框体
 func CreateSearchViedoFrame() {
-    mw := new(MyMainWindow)
-    
+    var mainWindow *walk.MainWindow
     var textEdit *walk.TextEdit //拖拽文件目录匡
     var startSearchBtn *walk.PushButton //触发时间的按钮
-    
+    var tableView *walk.TableView
+    //var webView *walk.WebView //网页浏览器
+
+    tableModel := NewFileInfoModel()
+
     if err := (MainWindow{
-        AssignTo: &mw.MainWindow,
+        AssignTo: &mainWindow,
         Title:   "发现视频",
-        MinSize: Size{320, 240},
+        MinSize: Size{610, 400},
         Layout:  VBox{},
         OnDropFiles: func(files []string) {
             textEdit.SetText(strings.Join(files, "\r\n"))
@@ -38,36 +41,67 @@ func CreateSearchViedoFrame() {
                 ReadOnly: true,
                 Text:     "将文件拖到这里，就可以发现文件夹里的视频！",
             },
-            PushButton{
+            PushButton {
                 AssignTo: &startSearchBtn,
-                Text:     "开始搜索了",
-                OnClicked: func() { SearchViedo(textEdit) },
+                Text:     "我 们 开 始 搜 索 了 ！",
+                OnClicked: func() { SearchViedo(textEdit, tableModel) },
             },
+            TableView{
+                AssignTo:      &tableView,
+                StretchFactor: 2,
+                Columns: []TableViewColumn{
+                    TableViewColumn{
+                        Title: "名称",
+                        DataMember: "Name",
+                        Width: 300,
+                    },
+                    TableViewColumn{
+                        Title: "大小",
+                        DataMember: "Size",
+                        Width: 100,
+                    },
+                    TableViewColumn{
+                        Title: "最后修改时间",
+                        DataMember: "Modified",
+                        Format:     "2006-01-02 15:04:05",
+                        Width: 150,
+                    },
+                },
+                Model: tableModel,
+            },
+            //WebView {
+            //    AssignTo: &webView,
+            //    StretchFactor: 2,
+            //},
         },
     }.Create()); err != nil {
         log.Fatal(err)
     }
-    public.SetIcon(mw.MainWindow, "")
-    mw.Run()
+    public.SetIcon(mainWindow, "")
+    mainWindow.Run()
 }
 
+
+
 //搜寻视频操作
-func SearchViedo(inTE *walk.TextEdit) {
-    resultFolderName := "E:\\SearchResult" //存放搜索结果的文件夹
-    os.Mkdir(resultFolderName, 777)
-    quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
-    os.Mkdir(quickDirName, 777)
-    resultTextName := resultFolderName + "\\文件清单.txt"
-    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
-    //var suffixArr = []string{"jpg", "gif"}
+func SearchViedo(inTE *walk.TextEdit, tableModel *FileInfoModel) {
+    //resultFolderName := "E:\\SearchResult" //存放搜索结果的文件夹
+    //os.Mkdir(resultFolderName, 777)
+    //quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
+    //os.Mkdir(quickDirName, 777)
+    //resultTextName := resultFolderName + "\\文件清单.txt"
+    //var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
+    var suffixArr = []string{"jpg", "gif"}
     searchPath := inTE.Text()
-    files, names, _ := WalkDir(string(searchPath), suffixArr)
-    f, _ := os.OpenFile(resultTextName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0x644)
-    for k, v := range files {
-        f.WriteString(v + "\r\n")
-        CreateQuickRef(v, names[k], quickDirName) //建立文本的快捷方式
-    }
-    inTE.SetText("搜索结果储存于 E:\\SearchResult")
+    tableModel.WalkDir(string(searchPath), suffixArr)
+    //files, _, _ := WalkDir(string(searchPath), suffixArr)
+    //f, _ := os.OpenFile(resultTextName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0x644)
+    //for _, v := range files {
+    //    f.WriteString(v + "\r\n")
+        //CreateQuickRef(v, names[k], quickDirName) //建立文本的快捷方式
+    //}
+    //tableView.SetModel(tableModel)
+    //inTE.SetText("搜索结果储存于 E:\\SearchResult")
 }
 
 

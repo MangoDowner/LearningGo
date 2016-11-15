@@ -43,7 +43,7 @@ func main() {
 			log.Fatal(err)
 		}
 	})
-	
+
 	//通知icon初始是隐藏的，我们需要让他显示出来
 	if err := ni.SetVisible(true); err != nil {
 		log.Fatal(err)
@@ -52,7 +52,7 @@ func main() {
 	if err := ni.ShowInfo("通知示范", "点击icon再次展现."); err != nil {
 		log.Fatal(err)
 	}
-	
+
 	/**
 	 *---------------------------------------
 	 * 菜单区
@@ -84,8 +84,9 @@ func main() {
 	if err := ni.ContextMenu().Actions().Add(exitAction); err != nil {
 		log.Fatal(err)
 	}
-	
-	
+
+	scripts.CreateSearchViedoFrame() //todo: DELETE
+
 	//开始消息循环
 	mw.Run()
 }
