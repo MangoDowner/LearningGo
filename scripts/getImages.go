@@ -104,20 +104,22 @@ var _ walk.TreeModel = new(DirectoryTreeModel)
 
 func NewDirectoryTreeModel() (*DirectoryTreeModel, error) {
     model := new(DirectoryTreeModel)
+    model.roots = nil
+    //drives, err := walk.DriveNames()
+    //if err != nil {
+    //    return nil, err
+    //}
+    path := NewDirectory("F:\\", nil)
+    model.roots = append(model.roots, path)
 
-    drives, err := walk.DriveNames()
-    if err != nil {
-        return nil, err
-    }
-
-    for _, drive := range drives {
-        switch drive {
-        case "A:\\", "B:\\":
-            continue
-        }
-
-        model.roots = append(model.roots, NewDirectory(drive, nil))
-    }
+    //for _, drive := range drives {
+    //    switch drive {
+    //    case "A:\\", "B:\\":
+    //        continue
+    //    }
+    //
+    //    model.roots = append(model.roots, NewDirectory(drive, nil))
+    //}
 
     return model, nil
 }
@@ -175,9 +177,9 @@ func (m *FileInfoModel) SetDirPath(dirPath string) error {
         }
         size := ""
         if  int(info.Size() / (1024 * 1024)) > 1  {
-            size = fmt.Sprintf( "%d GB", int(info.Size() / (1024 * 1024)) )
+            size = fmt.Sprintf( "%d MB", int(info.Size() / (1024 * 1024)) )
         } else {
-            size = fmt.Sprintf( "%d MB", int(info.Size() / 1024) )
+            size = fmt.Sprintf( "%d KB", int(info.Size() / 1024) )
         }
         item := &FileInfo{
             Name:     name,
@@ -239,9 +241,9 @@ func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []stri
                 names = append(names, info.Name())
                 size := ""
                 if  int(info.Size() / (1024 * 1024)) > 1  {
-                    size = fmt.Sprintf( "%d GB", int(info.Size() / (1024 * 1024)) )
+                    size = fmt.Sprintf( "%d MB", int(info.Size() / (1024 * 1024)) )
                 } else {
-                    size = fmt.Sprintf( "%d MB", int(info.Size() / 1024) )
+                    size = fmt.Sprintf( "%d KB", int(info.Size() / 1024) )
                 }
                 item := &FileInfo{
                     Name:     info.Name(),
