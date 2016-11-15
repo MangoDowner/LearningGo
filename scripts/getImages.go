@@ -110,7 +110,7 @@ func NewDirectoryTreeModel() (*DirectoryTreeModel, error) {
     //    return nil, err
     //}
     path := NewDirectory("F:\\", nil)
-    model.roots = append(model.roots, path)
+    model.roots = append(model.roots, NewDirectory("Learn", path))
 
     //for _, drive := range drives {
     //    switch drive {
@@ -139,8 +139,10 @@ func (m *DirectoryTreeModel) RootAt(index int) walk.TreeItem {
 
 type FileInfo struct {
     Name     string
+    Path     string
     Size     string
     Modified time.Time
+
 }
 
 type FileInfoModel struct {
@@ -183,6 +185,7 @@ func (m *FileInfoModel) SetDirPath(dirPath string) error {
         }
         item := &FileInfo{
             Name:     name,
+            Path:     "",
             Size:     size,
             Modified: info.ModTime(),
         }
@@ -219,7 +222,7 @@ func shouldExclude(name string) bool {
 
 //获取指定目录及所有子目录下的所有文件，可以匹配后缀过滤。
 func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []string, names []string, err error) {
-    m.dirPath = dirPth
+    //m.dirPath = dirPth
     m.items = nil
 
     files = make([]string, 0, 100)                                                       //文件路径
@@ -237,8 +240,6 @@ func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []stri
         for _, v := range suffixArr {
             suffix := "." + strings.ToUpper(v) //忽略后缀匹配的大小写
             if strings.HasSuffix(strings.ToUpper(info.Name()), suffix) {
-                files = append(files, filename)
-                names = append(names, info.Name())
                 size := ""
                 if  int(info.Size() / (1024 * 1024)) > 1  {
                     size = fmt.Sprintf( "%d MB", int(info.Size() / (1024 * 1024)) )
@@ -247,6 +248,7 @@ func (m *FileInfoModel) WalkDir(dirPth string, suffixArr []string) (files []stri
                 }
                 item := &FileInfo{
                     Name:     info.Name(),
+                    Path:     filepath.Dir(filename),
                     Size:     size,
                     Modified: info.ModTime(),
                 }
