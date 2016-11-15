@@ -49,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 	//icon显示出来后，将气泡显示出来
-	if err := ni.ShowInfo("通知示范", "点击icon再次展现."); err != nil {
+	if err := ni.ShowInfo("小夏工具包", "点击这里展现菜单."); err != nil {
 		log.Fatal(err)
 	}
 

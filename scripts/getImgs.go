@@ -22,9 +22,14 @@ func CreateSearchViedoFrame() {
     var mainWindow *walk.MainWindow
     var textEdit *walk.TextEdit //拖拽文件目录匡
     var startSearchBtn *walk.PushButton //触发时间的按钮
+    var treeView *walk.TreeView
     var tableView *walk.TableView
     //var webView *walk.WebView //网页浏览器
 
+    treeModel, err := NewDirectoryTreeModel()
+    if err != nil {
+        log.Fatal(err)
+    }
     tableModel := NewFileInfoModel()
 
     if err := (MainWindow{
@@ -45,6 +50,13 @@ func CreateSearchViedoFrame() {
                 AssignTo: &startSearchBtn,
                 Text:     "我 们 开 始 搜 索 了 ！",
                 OnClicked: func() { SearchViedo(textEdit, tableModel) },
+            },
+            TreeView{
+                AssignTo: &treeView,
+                Model:    treeModel,
+                OnCurrentItemChanged: func() {
+
+                },
             },
             TableView{
                 AssignTo:      &tableView,
