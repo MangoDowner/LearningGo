@@ -12,11 +12,6 @@ import (
     "log"
 )
 
-
-type MyMainWindow struct {
-    *walk.MainWindow
-}
-
 //展现主框体
 func CreateSearchViedoFrame() {
     var mainWindow *walk.MainWindow
