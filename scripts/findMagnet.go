@@ -11,10 +11,11 @@ import (
 
 func CreateFindMagnetFrame() {
     var mainWindow *walk.MainWindow
-    var inTE, outTE *walk.TextEdit
+    var inTE *walk.LineEdit
+    var outTE *walk.TextEdit
 
     var fontYahei Font
-    fontYahei.Family = "微软雅黑"
+    fontYahei.Family = "Consolas"
     fontYahei.Create()
 
     fmt.Println(Font{})
@@ -24,17 +25,26 @@ func CreateFindMagnetFrame() {
         MinSize: Size{600, 400},
         Layout:  VBox{},
         Children: []Widget{
-            HSplitter{
+            Composite{
+                Layout: Grid{Columns: 2},
                 Children: []Widget{
-                    TextEdit{AssignTo: &inTE},
-                    TextEdit{AssignTo: &outTE, ReadOnly: true},
-                },
-            },
-            PushButton{
-                Font: fontYahei,
-                Text: "开始查找",
-                OnClicked: func() {
-                    outTE.SetText(strings.ToUpper(inTE.Text()))
+                    LineEdit{
+                        Font: fontYahei,
+                        AssignTo: &inTE,
+                    },
+                    PushButton{
+                        Font: fontYahei,
+                        Text: "开始查找",
+                        OnClicked: func() {
+                            outTE.SetText(strings.ToUpper(inTE.Text()))
+                        },
+                    },
+                    TextEdit{
+                        Font: fontYahei,
+                        ColumnSpan: 2,
+                        AssignTo: &outTE,
+                        ReadOnly: true,
+                    },
                 },
             },
         },

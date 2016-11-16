@@ -22,6 +22,11 @@ func CreateSearchViedoFrame() {
 
     tableModel := NewFileInfoModel()
 
+    var fontYahei Font
+    fontYahei.Family = "微软雅黑"
+    fontYahei.Create()
+
+
     if err := (MainWindow{
         AssignTo: &mainWindow,
         Title:   "发现视频",
@@ -37,13 +42,15 @@ func CreateSearchViedoFrame() {
                     VSplitter{
                         Children: []Widget{
                             TextEdit{
+                                Font: fontYahei,
                                 AssignTo: &textEdit,
                                 ReadOnly: true,
-                                Text:     "将 文 件 夹 拉 到 这 里",
+                                Text:     "将文件夹拉到这里",
                             },
                             PushButton {
+                                Font: fontYahei,
                                 AssignTo: &startSearchBtn,
-                                Text:     "我 们 开 始 搜 索 了 ！",
+                                Text:     "开 始 搜 索 ！",
                                 OnClicked: func() { SearchViedo(textEdit, tableModel) },
                             },
                         },
