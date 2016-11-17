@@ -15,19 +15,37 @@ import (
     "math/rand"
 )
 
+type MagnetItem struct {
+    title  string  //标题
+    path   string  //地址
+}
+
+type MagnetModel struct {
+    walk.ListModelBase
+    items []MagnetItem
+}
+
+func (m *MagnetModel) ItemCount() int {
+    return len(m.items)
+}
+
+func (m *MagnetModel) Value(index int) interface{} {
+    return m.items[index].title
+}
+
 func CreateFindMagnetFrame() {
     var mainWindow *walk.MainWindow
     var inTE *walk.LineEdit
     var outTE *walk.TextEdit
-    var tableView *walk.TableView
+    var listBox *walk.ListBox
 
     var fontYahei Font
     fontYahei.Family = "Consolas"
     fontYahei.Create()
 
-    tableModel := NewFileInfoModel()
+    magnetModel := new(MagnetModel)
+    //magnetModel := GetResponseFromTorrentKitty("iptd-651")
 
-    fmt.Println(Font{})
     if err := (MainWindow{
         AssignTo: &mainWindow,
         Title:   "查找磁性链接",
@@ -45,35 +63,27 @@ func CreateFindMagnetFrame() {
                         Font: fontYahei,
                         Text: "开始查找",
                         OnClicked: func() {
-                            url := "http://www.yunbosou.cc/s/" + inTE.Text() +".html"
-                            tableModel.GetResponseFromUrl(url)
-                            //outTE.SetText(htmlText)
+                            searchWord := inTE.Text()
+                            GetResponseFromTorrentKitty(searchWord, magnetModel)
                         },
                     },
-                    TableView{
-                        AssignTo:      &tableView,
+                    ListBox{
+                        AssignTo: &listBox,
                         ColumnSpan: 2,
-                        StretchFactor: 2,
-                        Columns: []TableViewColumn{
-                            TableViewColumn{
-                                Title: "名称",
-                                DataMember: "Name",
-                                Width: 300,
-                            },
-                        },
-                        Model: tableModel,
+                        Model: magnetModel,
                         OnCurrentIndexChanged: func() {
-                            var path string
-                            if index := tableView.CurrentIndex(); index > -1 {
-                                path = tableModel.items[index].Path
+                            var url string
+                            if index := listBox.CurrentIndex(); index > -1 {
+                                path := magnetModel.items[index].path
+                                url = path
                             }
-                            outTE.SetText(path)
+                            outTE.SetText(url)
                         },
                     },
                     TextEdit{
-                        //Font: fontYahei,
-                        ColumnSpan: 2,
                         AssignTo: &outTE,
+                        Font: fontYahei,
+                        ColumnSpan: 2,
                         ReadOnly: true,
                     },
                 },
@@ -83,7 +93,6 @@ func CreateFindMagnetFrame() {
         log.Fatal(err)
     }
     public.SetIcon(mainWindow, "")
-    mainWindow.Font()
     mainWindow.Run()
 }
 
@@ -108,8 +117,9 @@ func GetRandomUserAgent() string {
     return userAgent[r.Intn(len(userAgent))]
 }
 
-//获取指定地址返回的内容
-func (m *FileInfoModel) GetResponseFromUrl(url string) (htmlText string) {
+//获取云播网返回的内容
+func (m *FileInfoModel) GetResponseFromYunbo(searchWord string) (htmlText string) {
+    url := "http://www.yunbosou.cc/s/" + searchWord +".html"
     req, _ := http.NewRequest("GET", url, nil)
     req.Header.Set("User-Agent", GetRandomUserAgent())
     client := http.DefaultClient
@@ -138,6 +148,36 @@ func (m *FileInfoModel) GetResponseFromUrl(url string) (htmlText string) {
         return htmlText
     }
     return htmlText
+}
+
+
+//获取torrent-kitty返回的内容
+func GetResponseFromTorrentKitty(searchWord string, magnetModel *MagnetModel) bool {
+    url := "https://www.torrentkitty.tv/search/" + searchWord +"/"
+    req, _ := http.NewRequest("GET", url, nil)
+    req.Header.Set("User-Agent", GetRandomUserAgent())
+    client := http.DefaultClient
+    res, e := client.Do(req)
+    if e != nil {
+        fmt.Errorf("Get请求地址%s返回错误:%s", url, e)
+        return false
+    }
+    if res.StatusCode == 200 {
+        body := res.Body
+        defer body.Close()
+        bodyByte, _ := ioutil.ReadAll(body)
+        oriText := string(bodyByte)
+        var regExpress = regexp.MustCompile(`<td class="name">([^<]*)</td><td class="size">.*<a href="/information/(\w+)`)
+        validUrls := regExpress.FindAllStringSubmatch(oriText, -1)
+        magnetModel.items = make([]MagnetItem, len(validUrls))
+        for k, url := range validUrls {
+            path :=  "magnet:?xt=urn:btih:" + url[2]
+            magnetModel.items[k] = MagnetItem{url[1], path}
+        }
+        magnetModel.PublishItemsReset()
+        return true
+    }
+    return false
 }
 
 //解析a元素 TODO:值得研究的xml函数库
