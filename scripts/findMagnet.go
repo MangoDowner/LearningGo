@@ -19,10 +19,13 @@ func CreateFindMagnetFrame() {
     var mainWindow *walk.MainWindow
     var inTE *walk.LineEdit
     var outTE *walk.TextEdit
+    var tableView *walk.TableView
 
     var fontYahei Font
     fontYahei.Family = "Consolas"
     fontYahei.Create()
+
+    tableModel := NewFileInfoModel()
 
     fmt.Println(Font{})
     if err := (MainWindow{
@@ -43,8 +46,28 @@ func CreateFindMagnetFrame() {
                         Text: "开始查找",
                         OnClicked: func() {
                             url := "http://www.yunbosou.cc/s/" + inTE.Text() +".html"
-                            htmlText := GetResponseFromUrl(url)
-                            outTE.SetText(htmlText)
+                            tableModel.GetResponseFromUrl(url)
+                            //outTE.SetText(htmlText)
+                        },
+                    },
+                    TableView{
+                        AssignTo:      &tableView,
+                        ColumnSpan: 2,
+                        StretchFactor: 2,
+                        Columns: []TableViewColumn{
+                            TableViewColumn{
+                                Title: "名称",
+                                DataMember: "Name",
+                                Width: 300,
+                            },
+                        },
+                        Model: tableModel,
+                        OnCurrentIndexChanged: func() {
+                            var path string
+                            if index := tableView.CurrentIndex(); index > -1 {
+                                path = tableModel.items[index].Path
+                            }
+                            outTE.SetText(path)
                         },
                     },
                     TextEdit{
@@ -86,7 +109,7 @@ func GetRandomUserAgent() string {
 }
 
 //获取指定地址返回的内容
-func GetResponseFromUrl(url string) (htmlText string) {
+func (m *FileInfoModel) GetResponseFromUrl(url string) (htmlText string) {
     req, _ := http.NewRequest("GET", url, nil)
     req.Header.Set("User-Agent", GetRandomUserAgent())
     client := http.DefaultClient
@@ -104,8 +127,14 @@ func GetResponseFromUrl(url string) (htmlText string) {
         var regExpress = regexp.MustCompile(`<a href="/magnet/detail/(\w+)[^>]*>([^<]*)</a>`) //以Must前缀的方法或函数都是必须保证一定能执行成功的,否则将引发一次panic
         validUrls := regExpress.FindAllStringSubmatch(oriText, -1)
         for _, url := range validUrls {
+            item := &FileInfo{
+                Name:     url[2],
+                Path:     url[1],
+            }
+            m.items = append(m.items, item)
             htmlText = htmlText + url[2] + "\r\nmagnet:?xt=urn:btih:" + url[1] + "\r\n\r\n"
         }
+        m.PublishRowsReset()
         return htmlText
     }
     return htmlText
