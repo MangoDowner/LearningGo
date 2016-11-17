@@ -15,7 +15,7 @@ import (
 //展现主框体
 func CreateSearchViedoFrame() {
     var mainWindow *walk.MainWindow
-    var textEdit *walk.TextEdit //拖拽文件目录匡
+    var lineEdit *walk.LineEdit //拖拽文件目录匡
     var startSearchBtn *walk.PushButton //触发时间的按钮
     var tableView *walk.TableView
     var webView *walk.WebView //网页浏览器
@@ -30,62 +30,63 @@ func CreateSearchViedoFrame() {
     if err := (MainWindow{
         AssignTo: &mainWindow,
         Title:   "发现视频",
-        MinSize:  Size{600, 400},
-        Size:     Size{1024, 640},
-        Layout:   HBox{MarginsZero: true},
+        Size:     Size{1000, 640},
+        Layout:  VBox{},
         OnDropFiles: func(files []string) {
-            textEdit.SetText(strings.Join(files, "\r\n"))
+            lineEdit.SetText(strings.Join(files, "\r\n"))
         },
         Children: []Widget{
             HSplitter{
                 Children: []Widget{
-                    VSplitter{
+                    Composite{
+                        Layout: Grid{Columns: 2},
                         Children: []Widget{
-                            TextEdit{
+                            LineEdit{
                                 Font: fontYahei,
-                                AssignTo: &textEdit,
+                                AssignTo: &lineEdit,
                                 ReadOnly: true,
                                 Text:     "将文件夹拉到这里",
                             },
                             PushButton {
                                 Font: fontYahei,
                                 AssignTo: &startSearchBtn,
-                                Text:     "开 始 搜 索 ！",
-                                OnClicked: func() { SearchViedo(textEdit, tableModel) },
+                                Text:     "搜 索",
+                                OnClicked: func() { SearchViedo(lineEdit.Text(), tableModel) },
                             },
-                        },
-                    },
-                    TableView{
-                        AssignTo:      &tableView,
-                        StretchFactor: 2,
-                        Columns: []TableViewColumn{
-                            TableViewColumn{
-                                Title: "名称",
-                                DataMember: "Name",
-                                Width: 300,
+                            TableView{
+                                AssignTo:      &tableView,
+                                ColumnSpan: 2,
+                                StretchFactor: 2,
+                                Columns: []TableViewColumn{
+                                    TableViewColumn{
+                                        Title: "名称",
+                                        DataMember: "Name",
+                                        Width: 300,
+                                    },
+                                    //TableViewColumn{
+                                    //    Title: "大小",
+                                    //    DataMember: "Size",
+                                    //    Width: 100,
+                                    //},
+                                    //TableViewColumn{
+                                    //    Title: "最后修改时间",
+                                    //    DataMember: "Modified",
+                                    //    Format:     "2006-01-02 15:04:05",
+                                    //    Width: 150,
+                                    //},
+                                },
+                                Model: tableModel,
+                                OnCurrentIndexChanged: func() {
+                                    var url string
+                                    if index := tableView.CurrentIndex(); index > -1 {
+                                        path := tableModel.items[index].Path
+                                        //    //dir := treeView.CurrentItem().(*Directory)
+                                        //    //url = filepath.Join(dir.Path(), name)
+                                        url = path
+                                    }
+                                    webView.SetURL(url)
+                                },
                             },
-                            //TableViewColumn{
-                            //    Title: "大小",
-                            //    DataMember: "Size",
-                            //    Width: 100,
-                            //},
-                            //TableViewColumn{
-                            //    Title: "最后修改时间",
-                            //    DataMember: "Modified",
-                            //    Format:     "2006-01-02 15:04:05",
-                            //    Width: 150,
-                            //},
-                        },
-                        Model: tableModel,
-                        OnCurrentIndexChanged: func() {
-                            var url string
-                            if index := tableView.CurrentIndex(); index > -1 {
-                                path := tableModel.items[index].Path
-                            //    //dir := treeView.CurrentItem().(*Directory)
-                            //    //url = filepath.Join(dir.Path(), name)
-                                url = path
-                            }
-                            webView.SetURL(url)
                         },
                     },
                     WebView {
@@ -105,15 +106,14 @@ func CreateSearchViedoFrame() {
 
 
 //搜寻视频操作
-func SearchViedo(inTE *walk.TextEdit, tableModel *FileInfoModel) {
+func SearchViedo(searchPath string, tableModel *FileInfoModel) {
     //resultFolderName := "E:\\SearchResult" //存放搜索结果的文件夹
     //os.Mkdir(resultFolderName, 777)
     //quickDirName := resultFolderName + "\\Quick" //存放搜索结果快捷方式的文件夹
     //os.Mkdir(quickDirName, 777)
     //resultTextName := resultFolderName + "\\文件清单.txt"
-    var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
-    //var suffixArr = []string{"jpg", "gif"}
-    searchPath := inTE.Text()
+    //var suffixArr = []string{"mpeg", "avi", "mov", "wmv", "mkv", "mp4"}
+    var suffixArr = []string{"jpg", "gif", "png"}
     tableModel.WalkDir(string(searchPath), suffixArr)
     //files, _, _ := WalkDir(string(searchPath), suffixArr)
     //f, _ := os.OpenFile(resultTextName, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0x644)
